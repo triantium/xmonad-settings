@@ -1,15 +1,11 @@
---
--- xmonad example config file.
---
--- A template showing all available configuration hooks,
--- and how to override the defaults in your own xmonad.hs conf file.
---
--- Normally, you'd only override those defaults you care about.
---
+--Imports --
 
 import XMonad
 import Data.Monoid
 import System.Exit
+import XMonad.Util.SpawnOnce
+import XMonad.Util.Run
+import XMonad.Hooks.ManageDocks
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -29,7 +25,7 @@ myClickJustFocuses = False
 
 -- Width of the window border in pixels.
 --
-myBorderWidth   = 1
+myBorderWidth   = 2
 
 -- modMask lets you specify which modkey you want to use. The default
 -- is mod1Mask ("left alt").  You may also consider using mod3Mask
@@ -61,6 +57,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- launch a terminal
     [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
+
+    -- add another terminal hotkey
+ --   , ((modm,               xK_Return     ), spawn $ XMonad.terminal conf)
 
     -- launch dmenu
     , ((modm,               xK_p     ), spawn "dmenu_run")
@@ -243,14 +242,19 @@ myLogHook = return ()
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
-myStartupHook = return ()
+
+myStartupHook = do
+	spawnOnce  "nitrogen --restore &"
+	spawnOnce  "compton &"
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
 
 -- Run xmonad with the settings you specify. No need to modify this.
 --
-main = xmonad defaults
+main = do
+	xmonproc <- spawnPipe "xmobar -x 1 /home/triantium/.config/xmobar/xmobarrc"
+	xmonad $ docks defaults
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
